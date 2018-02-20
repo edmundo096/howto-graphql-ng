@@ -10,7 +10,7 @@ import { AppComponent } from './app.component';
 import { LinkItemComponent } from './link-item/link-item.component';
 import { LinkListComponent } from './link-list/link-list.component';
 import { CreateLinkComponent } from './create-link/create-link.component';
-// import { HeaderComponent } from './header/header.component';
+import { HeaderComponent } from './header/header.component';
 
 
 @NgModule({
@@ -19,7 +19,7 @@ import { CreateLinkComponent } from './create-link/create-link.component';
     LinkItemComponent,
     LinkListComponent,
     CreateLinkComponent,
-    // HeaderComponent
+    HeaderComponent
   ],
   imports: [
     BrowserModule,
