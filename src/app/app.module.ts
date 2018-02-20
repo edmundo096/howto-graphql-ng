@@ -1,6 +1,8 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 
+import { GraphQLModule } from './apollo.config';
+
 
 import { AppComponent } from './app.component';
 
@@ -10,7 +12,10 @@ import { AppComponent } from './app.component';
     AppComponent
   ],
   imports: [
-    BrowserModule
+    BrowserModule,
+
+    // GraphQL connection
+    GraphQLModule,
   ],
   providers: [],
   bootstrap: [AppComponent]
