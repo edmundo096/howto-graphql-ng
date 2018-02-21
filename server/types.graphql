@@ -5,6 +5,8 @@ type Link @model {
 
   description: String!
   url: String!
+
+  postedBy: User @relation(name: "UsersLinks")
 }
 
 
@@ -17,8 +19,11 @@ type User @model {
   createdAt: DateTime! # read-only (managed by Graphcool)
   updatedAt: DateTime! # read-only (managed by Graphcool)
 
+  name: String!
   email: String! @isUnique
   password: String!
+
+  links: [Link!]! @relation(name: "UsersLinks")
 }
 
 
