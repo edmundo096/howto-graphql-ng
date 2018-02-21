@@ -6,7 +6,7 @@ type Link @model {
   description: String!
   url: String!
 
-  postedBy: User @relation(name: "UsersLinks")
+  postedBy: User @relation(name: "UsersLinks")  # Self NOTE: shouldn't be required ?
 }
 
 

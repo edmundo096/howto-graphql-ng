@@ -3,6 +3,7 @@ import { Apollo } from 'apollo-angular';
 
 import { ALL_LINKS_QUERY, CREATE_LINK_MUTATION, CreateLinkMutationResponse } from '../graphql';
 import { Router } from '@angular/router';
+import { GC_USER_ID } from '../constants';
 
 @Component({
   selector: 'app-create-link',
@@ -20,11 +21,23 @@ export class CreateLinkComponent implements OnInit {
   }
 
   createLink() {
+    const postedById = localStorage.getItem(GC_USER_ID);
+    if (!postedById) {
+      console.error('No user logged in');
+      return
+    }
+
+    const newDescription = this.description;
+    const newUrl = this.url;
+    this.description = '';
+    this.url = '';
+
     this.apollo.mutate<CreateLinkMutationResponse>({
       mutation: CREATE_LINK_MUTATION,
       variables: {
-        description: this.description,
-        url: this.url,
+        description: newDescription,
+        url: newUrl,
+        postedById
       },
 
       // NOTE: Tutorial doesn't explains too much about this, but here he does:
@@ -45,6 +58,10 @@ export class CreateLinkComponent implements OnInit {
     }).subscribe((response) => {
       console.log('mutation response:', response);
       this.router.navigate(['/']);
+    }, (error)=>{
+      console.error(error);
+      this.description = newDescription;
+      this.url = newUrl;
     });
   }
 

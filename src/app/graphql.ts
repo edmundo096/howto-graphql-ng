@@ -28,15 +28,21 @@ export interface AllLinkQueryResponse {
 // 1
 export const CREATE_LINK_MUTATION = gql`
   # 2
-  mutation CreateLinkMutation($description: String!, $url: String!) {
+#  Self NOTE: Graphcool generates for creations a "postedBy" (with an User) and a "postedById" (with an User ID)
+  mutation CreateLinkMutation($description: String!, $url: String!, $postedById: ID!) {
     createLink(
       description: $description,
       url: $url,
+      postedById: $postedById
     ) {
       id
       createdAt
       url
       description
+      postedBy {
+        id
+        name
+      }
     }
   }
 `;
