@@ -55,6 +55,10 @@ functions:
 permissions:
   - operation: "*"
 
+#  Self NOTE: The permissions are not working when working locally, Headers are not sent due CORS.
+  - operation: Link.create
+    authenticated: true
+
 
 # Your root tokens used for functions to get full access to the API
 # Read more here:
