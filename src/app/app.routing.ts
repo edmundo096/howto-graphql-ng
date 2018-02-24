@@ -1,13 +1,14 @@
 /**
  * Created by Edmundo Elizondo on 2/20/2018.
  */
-import {NgModule} from '@angular/core';
-import {RouterModule, Routes} from '@angular/router';
+import { NgModule } from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
 
 // 1
-import {LinkListComponent} from './link-list/link-list.component';
-import {CreateLinkComponent} from './create-link/create-link.component';
+import { LinkListComponent } from './link-list/link-list.component';
+import { CreateLinkComponent } from './create-link/create-link.component';
 import { LoginComponent } from './login/login.component';
+import { SearchComponent } from './search/search.component';
 
 /**
  * Setup all routes here
@@ -27,6 +28,11 @@ const routes: Routes = [
   {
     path: 'login',
     component: LoginComponent,
+    pathMatch: 'full'
+  },
+  {
+    path: 'search',
+    component: SearchComponent,
     pathMatch: 'full'
   },
   {

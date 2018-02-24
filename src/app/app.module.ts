@@ -14,6 +14,7 @@ import { HeaderComponent } from './header/header.component';
 import { LoginComponent } from './login/login.component';
 
 import { AuthService } from './auth.service';
+import { SearchComponent } from './search/search.component';
 
 
 @NgModule({
@@ -23,7 +24,8 @@ import { AuthService } from './auth.service';
     LinkListComponent,
     CreateLinkComponent,
     HeaderComponent,
-    LoginComponent
+    LoginComponent,
+    SearchComponent
   ],
   imports: [
     BrowserModule,
