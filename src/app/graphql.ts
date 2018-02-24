@@ -13,6 +13,16 @@ export const ALL_LINKS_QUERY = gql`
       createdAt
       url
       description
+      postedBy {
+        id
+        name
+      }
+      votes {
+        id
+        user {
+          id
+        }
+      }
     }
   }
 `;
@@ -58,6 +68,8 @@ export interface CreateLinkMutationResponse {
 export const CREATE_USER_MUTATION = gql`
   mutation CreateUserMutation($name: String!, $email: String!, $password: String!) {
 #    NOTE: seems to be outdated on the tutorial, it didn't used the template ones. So we used it below.
+#    UPDATED NOTE: The "createUser" and "signinUser" are created only when creating the prohect on the WEB CONSOLE Only as an Auth provider! (probably this tutorial is incomplete vs others using it).
+    
 #    createUser(
 #      name: $name,
 #      authProvider: {

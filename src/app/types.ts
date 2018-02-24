@@ -1,15 +1,27 @@
 /**
  * Created by Edmundo Elizondo on 2/19/2018.
  */
-export interface Link {
+export class Link {
   id?: string;
   description?: string;
   url?: string;
+
+  createdAt?: string;
+  postedBy?: User;
+  votes?: Vote[];
 }
 
 // NOTE: Seems to not be mentioned on the tutorial but is needed.
-export interface User {
+export class User {
   id?: string;
+
+  name?: string;
+  email?: string;
+  votes?: Vote[];
 }
 
-// TODO: seems to be missing the props as the GraphQL schema types.
+export class Vote {
+  id?: string;
+  user?: User;
+  link?: Link;
+}
