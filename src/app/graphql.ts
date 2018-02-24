@@ -147,3 +147,32 @@ export interface SigninUserMutationResponse {
     token: string
   }
 }
+
+
+export const CREATE_VOTE_MUTATION = gql`
+  mutation CreateVoteMutation($userId: ID!, $linkId: ID!) {
+    createVote(userId: $userId, linkId: $linkId) {
+      id
+      link {
+        votes {
+          id
+          user {
+            id
+          }
+        }
+      }
+      user {
+        id
+      }
+    }
+  }
+`;
+
+export interface CreateVoteMutationResponse {
+  // loading: boolean;
+  createVote: {
+    id: string;
+    link: Link;
+    user: User;
+  };
+}
