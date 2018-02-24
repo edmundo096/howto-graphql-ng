@@ -1,6 +1,8 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Apollo } from 'apollo-angular';
 import { Subscription } from 'rxjs/Subscription';
+import { DataProxy } from 'apollo-cache';
+import { FetchResult } from 'apollo-link';
 
 import { Link } from '../types';
 import { timeDifferenceForDate } from '../utils';
@@ -15,14 +17,10 @@ import { GC_USER_ID } from '../constants';
 })
 export class LinkItemComponent implements OnInit, OnDestroy {
 
-  @Input()
-  link: Link;
-
-  @Input()
-  index: number = 8;
-
-  @Input()
-  isAuthenticated: boolean = false;
+  @Input() link: Link;
+  @Input() index: number = 8;
+  @Input() isAuthenticated: boolean = false;
+  @Input() updateStoreAfterVote: UpdateStoreAfterVoteCallback;
 
   subscriptions: Subscription[] = [];
 
@@ -49,11 +47,17 @@ export class LinkItemComponent implements OnInit, OnDestroy {
         variables: {
           userId,
           linkId
-        }
+        },
+        update: (store, {data: {createVote}}) => {
+          // Will be called when the server returns the response.
+          // It receives the payload of the mutation (data) and the current cache (store) as arguments
+          // You can then use this input to determine a new state for the cache.
+          this.updateStoreAfterVote(store, createVote, linkId);
+        },
       })
       .subscribe();
 
-    this.subscriptions = [...this.subscriptions, mutationSubscription];
+    this.subscriptions = [... this.subscriptions, mutationSubscription];
   }
 
   humanizeDate(date: string) {
@@ -68,4 +72,8 @@ export class LinkItemComponent implements OnInit, OnDestroy {
     }
   }
 
+}
+
+interface UpdateStoreAfterVoteCallback /*extends Function*/ {
+  (proxy: DataProxy, mutationResult: FetchResult, linkId: string);
 }

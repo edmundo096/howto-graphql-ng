@@ -56,4 +56,18 @@ export class LinkListComponent implements OnInit, OnDestroy {
     }
   }
 
+  updateStoreAfterVote (store, createVote, linkId) {
+    // 1
+    const data = store.readQuery({
+      query: ALL_LINKS_QUERY
+    });
+
+    // 2
+    const votedLink = data.allLinks.find(link => link.id === linkId);
+    votedLink.votes = createVote.link.votes;  // createVote was returned by the server.
+
+    // 3. take the modified data and write it back into the store.
+    store.writeQuery({ query: ALL_LINKS_QUERY, data })
+  }
+
 }
