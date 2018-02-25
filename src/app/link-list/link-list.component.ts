@@ -1,9 +1,8 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Apollo } from 'apollo-angular';
+import { Apollo, QueryRef } from 'apollo-angular';
 import { Link } from '../types';
 
-// 1
-import { ALL_LINKS_QUERY, AllLinkQueryResponse } from '../graphql';
+import { ALL_LINKS_QUERY, AllLinkQueryResponse, NEW_LINKS_SUBSCRIPTION, NewLinkSubcriptionResponse } from '../graphql';
 
 import { Subscription } from 'rxjs/Subscription';
 import { distinctUntilChanged } from 'rxjs/operators';
@@ -16,14 +15,13 @@ import { AuthService } from '../auth.service';
   styleUrls: ['./link-list.component.css']
 })
 export class LinkListComponent implements OnInit, OnDestroy {
-  // 2
+
   allLinks: Link[] = [];
   loading: boolean = true;
 
   logged: boolean = false;
   subscriptions: Subscription[] = [];
 
-  // 3
   constructor(private apollo: Apollo, private authService: AuthService) { }
 
   ngOnInit() {
@@ -34,11 +32,29 @@ export class LinkListComponent implements OnInit, OnDestroy {
         this.logged = isAuthenticated
       });
 
-    // 4
-    const querySubscription = this.apollo.watchQuery<AllLinkQueryResponse>({
+    // Self NOTE: apollo-angular@1.0.0 Replaces "ApolloQueryObservable" with "QueryRef"
+    const allLinkQuery: QueryRef<AllLinkQueryResponse> = this.apollo.watchQuery<AllLinkQueryResponse>({
       query: ALL_LINKS_QUERY
-    }).valueChanges.subscribe((response) => {
-      // 5
+    });
+
+
+    // Self NOTE: a bit complicated, outdated explanation: https://www.howtographql.com/angular-apollo/8-subscriptions/
+    allLinkQuery
+      .subscribeToMore({    // will open up a WebSocket connection to the subscription server
+        document: NEW_LINKS_SUBSCRIPTION,
+        updateQuery: (previous: AllLinkQueryResponse, { subscriptionData }) => {
+          const newAllLinks: Link[] = [
+            (<NewLinkSubcriptionResponse>subscriptionData.data.Link).node,
+            ...previous.allLinks
+          ];
+          return {
+            ...previous,
+            allLinks: newAllLinks
+          }
+        }
+      });
+
+    const querySubscription = allLinkQuery.valueChanges.subscribe((response) => {
       this.allLinks = response.data.allLinks;
       // Self NOTE: The tutorial had "response.data.loading;" but seems the real "loading" should come from Apollo response type.
       this.loading = response.loading;
