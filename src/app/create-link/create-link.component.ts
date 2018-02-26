@@ -46,14 +46,27 @@ export class CreateLinkComponent implements OnInit {
       update: (store, {data: {createLink}}) => {
         // Read the data from the cache for this query.
         const data: any = store.readQuery({
-          query: ALL_LINKS_QUERY
+          query: ALL_LINKS_QUERY,
+          variables: {
+            first: 5,
+            skip: 0,
+            orderBy: 'createdAt_DESC'
+          }
         });
 
         // Add our link from the mutation to the end.
         data.allLinks.push(createLink);
 
         // Write the data back to the cache.
-        store.writeQuery({ query: ALL_LINKS_QUERY, data })
+        store.writeQuery({
+          query: ALL_LINKS_QUERY,
+          variables: {
+            first: 5,
+            skip: 0,
+            orderBy: 'createdAt_DESC'
+          },
+          data
+        })
       },
     }).subscribe((response) => {
       console.log('mutation response:', response);
