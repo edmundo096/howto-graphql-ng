@@ -2,7 +2,10 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Apollo, QueryRef } from 'apollo-angular';
 import { Link } from '../types';
 
-import { ALL_LINKS_QUERY, AllLinkQueryResponse, NEW_LINKS_SUBSCRIPTION, NewLinkSubcriptionResponse } from '../graphql';
+import {
+  ALL_LINKS_QUERY, AllLinkQueryResponse, NEW_LINKS_SUBSCRIPTION, NEW_VOTES_SUBSCRIPTION, NewLinkSubcriptionResponse,
+  NewVoteSubcriptionResponse
+} from '../graphql';
 
 import { Subscription } from 'rxjs/Subscription';
 import { distinctUntilChanged } from 'rxjs/operators';
@@ -39,6 +42,7 @@ export class LinkListComponent implements OnInit, OnDestroy {
 
 
     // Self NOTE: a bit complicated, outdated explanation: https://www.howtographql.com/angular-apollo/8-subscriptions/
+    // A bit more complete detail on the tutorial src: https://github.com/howtographql/angular-apollo/blob/master/src/app/link-list/link-list.component.ts
     allLinkQuery
       .subscribeToMore({    // will open up a WebSocket connection to the subscription server
         document: NEW_LINKS_SUBSCRIPTION,
@@ -47,6 +51,25 @@ export class LinkListComponent implements OnInit, OnDestroy {
             (<NewLinkSubcriptionResponse>subscriptionData.data.Link).node,
             ...previous.allLinks
           ];
+          return {
+            ...previous,
+            allLinks: newAllLinks
+          }
+        }
+      });
+
+    allLinkQuery
+      .subscribeToMore({
+        document: NEW_VOTES_SUBSCRIPTION,
+        updateQuery: (previous: AllLinkQueryResponse, { subscriptionData }) => {
+          const votedLinkIndex = previous.allLinks.findIndex(link =>
+            link.id === (<NewVoteSubcriptionResponse>subscriptionData.data.Vote).node.link.id
+          );
+          const link = (<NewVoteSubcriptionResponse>subscriptionData.data.Vote).node.link;
+
+          const newAllLinks = previous.allLinks.slice();
+          newAllLinks[votedLinkIndex] = link;
+
           return {
             ...previous,
             allLinks: newAllLinks
