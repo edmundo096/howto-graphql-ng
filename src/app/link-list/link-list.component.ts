@@ -1,6 +1,7 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Apollo, QueryRef } from 'apollo-angular';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, ActivatedRouteSnapshot, Router } from '@angular/router';
+import _ from 'lodash';
 
 import {
   ALL_LINKS_QUERY, AllLinkQueryResponse, NEW_LINKS_SUBSCRIPTION, NEW_VOTES_SUBSCRIPTION, NewLinkSubcriptionResponse,
@@ -37,7 +38,51 @@ export class LinkListComponent implements OnInit, OnDestroy {
   linksPerPage = LINKS_PER_PAGE;
   count = 0;
 
-  constructor(private apollo: Apollo, private authService: AuthService, private route: ActivatedRoute) { }
+  constructor(private apollo: Apollo, private authService: AuthService, private route: ActivatedRoute,
+              private router: Router) { }
+
+  get orderedLinks(): Observable<Link[]> {
+    return this.route.url.pipe(
+      map((segments) => segments.toString()),
+      map(path => {
+        if (path.includes('top')) {
+          return _.orderBy(this.allLinks, 'votes.length').reverse()
+        } else {
+          return this.allLinks
+        }
+      })
+    );
+  }
+
+  get isFirstPage(): Observable<boolean> {
+    return this.route.paramMap.pipe(
+      map((params) => {
+        return parseInt(params.get('page'), 10);
+      }),
+      map(page => page === 1)
+    );
+  }
+
+  get isNewPage(): Observable<boolean> {
+    return this.route.url.pipe(
+      map((segments) => segments.toString()),
+      map(path => path.includes('new'))
+    );
+  }
+
+  get pageNumber(): Observable<number> {
+    return this.route.paramMap.pipe(
+      map((params) => {
+        return parseInt(params.get('page'), 10);
+      })
+    );
+  }
+
+  get morePages(): Observable<boolean> {
+    return this.pageNumber.pipe(
+      map(pageNumber => pageNumber < this.count / this.linksPerPage)
+    );
+  }
 
   ngOnInit() {
 
@@ -64,7 +109,7 @@ export class LinkListComponent implements OnInit, OnDestroy {
     // 2
     this.first$ = path$.pipe(
       map((path) => {
-        const isNewPage = path.includes('new');     // Self NOTE: "new" page are the latest ones, else are the "Tops" ones.
+        const isNewPage = path.includes('new');     // Self NOTE: "new" page are the latest ones, else are the "top"s ones.
         return isNewPage ? this.linksPerPage : 100;
       })
     );
@@ -105,12 +150,14 @@ export class LinkListComponent implements OnInit, OnDestroy {
       // 6
       combineLatest(this.first$, this.skip$, this.orderBy$, (first, skip, orderBy) => ({ first, skip, orderBy }))
       // 7
+      // We use switchMap to "flatten" the Observable<Observable<ApolloQueryResult<AllLinkQueryResponse>>> (if we used .map())
+      // to an Observable<ApolloQueryResult<AllLinkQueryResponse>>
       .pipe( switchMap((variables: any) =>  getQuery(variables)) );
 
     const querySubscription = allLinkQuery.subscribe((response) => {
       this.allLinks = response.data.allLinks;
       this.count = response.data._allLinksMeta.count;
-      // Self NOTE: The tutorial had "response.data.loading;" but seems the real "loading" should come from Apollo response type.
+      // Self NOTE: The tutorial had "response.data.loading;" but seems the real "loading" should come from ApolloQueryResult type.
       this.loading = response.loading;
     });
 
@@ -160,6 +207,24 @@ export class LinkListComponent implements OnInit, OnDestroy {
       if (sub && sub.unsubscribe) {
         sub.unsubscribe();
       }
+    }
+  }
+
+  // Previous- and Next-buttons.
+
+  nextPage() {
+    const page = parseInt(this.route.snapshot.params.page, 10);
+    if (page < this.count / LINKS_PER_PAGE) {
+      const nextPage = page + 1;
+      this.router.navigate([`/new/${nextPage}`]);
+    }
+  }
+
+  previousPage() {
+    const page = parseInt(this.route.snapshot.params.page, 10);
+    if (page > 1) {
+      const previousPage = page - 1;
+      this.router.navigate([`/new/${previousPage}`]);
     }
   }
 

@@ -1,8 +1,14 @@
 <h4 *ngIf="loading">Loading...</h4>
 
-<app-link-item *ngFor="let link of allLinks; let index = index"
+<app-link-item *ngFor="let link of (orderedLinks| async); let index = index"
                [link]="link"
                [index]="index"
                [isAuthenticated]="logged"
-               [updateStoreAfterVote]="updateStoreAfterVote">
+               [updateStoreAfterVote]="updateStoreAfterVote"
+               [pageNumber]="pageNumber | async">
 </app-link-item>
+
+<div *ngIf="isNewPage | async">
+  <button *ngIf="!(isFirstPage | async)" (click)="previousPage()">Previous</button>
+  <button *ngIf="morePages| async" (click)="nextPage()">Next</button>
+</div>

@@ -22,6 +22,8 @@ export class LinkItemComponent implements OnInit, OnDestroy {
   @Input() isAuthenticated: boolean = false;
   @Input() updateStoreAfterVote: UpdateStoreAfterVoteCallback;
 
+  @Input() pageNumber: number = 0;
+
   subscriptions: Subscription[] = [];
 
 
