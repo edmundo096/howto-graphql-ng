@@ -1,7 +1,7 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Apollo, QueryRef } from 'apollo-angular';
 import { ActivatedRoute, ActivatedRouteSnapshot, Router } from '@angular/router';
-import _ from 'lodash';
+import * as _ from 'lodash';
 
 import {
   ALL_LINKS_QUERY, AllLinkQueryResponse, NEW_LINKS_SUBSCRIPTION, NEW_VOTES_SUBSCRIPTION, NewLinkSubcriptionResponse,
@@ -44,11 +44,11 @@ export class LinkListComponent implements OnInit, OnDestroy {
   get orderedLinks(): Observable<Link[]> {
     return this.route.url.pipe(
       map((segments) => segments.toString()),
-      map(path => {
+      map((path) => {
         if (path.includes('top')) {
-          return _.orderBy(this.allLinks, 'votes.length').reverse()
+          return _.orderBy(this.allLinks, 'votes.length').reverse();
         } else {
-          return this.allLinks
+          return this.allLinks;
         }
       })
     );
