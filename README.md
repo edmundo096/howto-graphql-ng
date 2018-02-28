@@ -1,5 +1,12 @@
 # HowtoGraphqlNg
 
+GraphQL-Angular tutorial implementation of https://www.howtographql.com/angular-apollo/0-introduction/ on February 28, 2018.
+
+Play around on https://ng-graphql.surge.sh
+Database will be on until who knows when.
+
+---
+
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 1.7.0.
 
 ## Development server
