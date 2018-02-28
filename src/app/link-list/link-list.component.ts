@@ -11,7 +11,7 @@ import {
 import { Subscription } from 'rxjs/Subscription';
 import { Observable } from 'rxjs/Observable';
 import { combineLatest } from 'rxjs/observable/combineLatest';
-import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
+import { distinctUntilChanged, map, switchMap, take } from 'rxjs/operators';
 
 import { AuthService } from '../auth.service';
 import { Link } from '../types';
@@ -228,10 +228,19 @@ export class LinkListComponent implements OnInit, OnDestroy {
     }
   }
 
-  updateStoreAfterVote (store, createVote, linkId) {
+
+  // Self NOTE: This NEEDS to be a expression function in order to the "this" point to this LinkList and not the LinkItem.
+  updateStoreAfterVote = (store, createVote, linkId) => {
+    let variables;
+
+    combineLatest(this.first$, this.skip$, this.orderBy$, (first, skip, orderBy) => ({ first, skip, orderBy }))
+      .pipe(take(1))
+      .subscribe(values => variables = values);
+
     // 1
     const data = store.readQuery({
-      query: ALL_LINKS_QUERY
+      query: ALL_LINKS_QUERY,
+      variables
     });
 
     // 2
@@ -239,7 +248,7 @@ export class LinkListComponent implements OnInit, OnDestroy {
     votedLink.votes = createVote.link.votes;  // createVote was returned by the server.
 
     // 3. take the modified data and write it back into the store.
-    store.writeQuery({ query: ALL_LINKS_QUERY, data })
+    store.writeQuery({ query: ALL_LINKS_QUERY, variables, data })
   }
 
 }
