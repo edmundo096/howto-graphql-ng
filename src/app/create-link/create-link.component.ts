@@ -1,23 +1,34 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Apollo } from 'apollo-angular';
 
 import { ALL_LINKS_QUERY, CREATE_LINK_MUTATION, CreateLinkMutationResponse } from '../graphql';
 import { Router } from '@angular/router';
-import { GC_USER_ID } from '../constants';
+import { GC_USER_ID, LINKS_PER_PAGE } from '../constants';
+import { Subscription } from 'rxjs/Subscription';
 
 @Component({
   selector: 'app-create-link',
   templateUrl: './create-link.component.html',
   styleUrls: ['./create-link.component.css']
 })
-export class CreateLinkComponent implements OnInit {
+export class CreateLinkComponent implements OnInit, OnDestroy {
 
   description: string = '';
   url: string = '';
 
+  subscriptions: Subscription[] = [];
+
   constructor(private apollo: Apollo, private router: Router) { }
 
   ngOnInit() {
+  }
+
+  ngOnDestroy(): void {
+    for (let sub of this.subscriptions) {
+      if (sub && sub.unsubscribe) {
+        sub.unsubscribe();
+      }
+    }
   }
 
   createLink() {
@@ -32,7 +43,7 @@ export class CreateLinkComponent implements OnInit {
     this.description = '';
     this.url = '';
 
-    this.apollo.mutate<CreateLinkMutationResponse>({
+    const createMutationSubscription = this.apollo.mutate<CreateLinkMutationResponse>({
       mutation: CREATE_LINK_MUTATION,
       variables: {
         description: newDescription,
@@ -48,7 +59,7 @@ export class CreateLinkComponent implements OnInit {
         const data: any = store.readQuery({
           query: ALL_LINKS_QUERY,
           variables: {
-            first: 5,
+            first: LINKS_PER_PAGE,
             skip: 0,
             orderBy: 'createdAt_DESC'
           }
@@ -58,10 +69,12 @@ export class CreateLinkComponent implements OnInit {
         data.allLinks.push(createLink);
 
         // Write the data back to the cache.
+        // Self NOTE: Apollo will notice that the "postedBy" User object has NOT the "votes" property
+        //  from our "createLink" result (as we explicit specified on ALL_LINKS_QUERY) when saving to the cache.
         store.writeQuery({
           query: ALL_LINKS_QUERY,
           variables: {
-            first: 5,
+            first: LINKS_PER_PAGE,
             skip: 0,
             orderBy: 'createdAt_DESC'
           },
@@ -76,6 +89,8 @@ export class CreateLinkComponent implements OnInit {
       this.description = newDescription;
       this.url = newUrl;
     });
+
+    this.subscriptions = [...this.subscriptions, createMutationSubscription];
   }
 
 }
